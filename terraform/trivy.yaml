@@ -1,0 +1,7 @@
+severity:
+  - CRITICAL
+  - HIGH
+
+format: table
+
+output: trivy-result.txt

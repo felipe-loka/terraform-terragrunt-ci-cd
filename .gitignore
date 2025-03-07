@@ -1,3 +1,5 @@
+trivy-result.txt
+
 # Local .terraform directories
 **/.terraform/*
 

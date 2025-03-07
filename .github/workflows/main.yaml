@@ -68,9 +68,33 @@ jobs:
         uses: aquasecurity/trivy-action@0.28.0
         with:
           working-directory: terraform
+          format: table
           scan-type: config
           severity: CRITICAL,HIGH
-          fail-on-diff: true
+          fail-on-diff: false
+          output: trivy-result.txt
+
+      - name: Format Trivy Scan Result
+        run: |
+          cat trivy-result.txt
+          if [ -s trivy-result.txt ]; then
+            echo -e "## Vulnerability Scan Results\n<details><summary>Details</summary>\n\n\`\`\`\n$(cat trivy-result.txt)\n\`\`\`\n</details>" > trivy-result.txt
+            echo "vulnerabilities=true" >> $GITHUB_ENV
+          else
+            echo "vulnerabilities=false" >> $GITHUB_ENV
+          fi
+
+      - name: Comment PR with Trivy scan results
+        if: env.vulnerabilities == 'true'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: trivy-result.txt
+
+      - name: Fail if Vulnerabilities Exist
+        if: env.vulnerabilities == 'true'
+        run: |
+          echo "Vulnerabilities were found. Please fix it following commits."
+          exit 1
 
       - name: Terraform TfLint
         working-directory: terraform
